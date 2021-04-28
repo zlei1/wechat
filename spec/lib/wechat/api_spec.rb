@@ -420,6 +420,19 @@ RSpec.describe Wechat::Api do
     end
   end
 
+  describe '#media_uploadvideo' do
+    specify 'will post media/uploadvideo with access_token, media_id, title and description in payload' do
+      media_id = 'media_id'
+      title = 'title'
+      description = 'description'
+      payload = { media_id: media_id, title: title, description: description }
+      expect(subject.client).to receive(:post)
+        .with('media/uploadvideo', payload.to_json,
+              params: { access_token: 'access_token' }).and_return(true)
+      expect(subject.media_uploadvideo(media_id, title, description)).to be true
+    end
+  end
+
   describe '#media_uploadnews' do
     let(:items) do
       [

@@ -36,6 +36,10 @@ module Wechat
       post_file 'media/uploadimg', file
     end
 
+    def media_uploadvideo(media_id, title, description)
+      post 'media/uploadvideo', JSON.generate({ media_id: media_id, title: title, description: description })
+    end
+
     def media_uploadnews(mpnews_message)
       post 'media/uploadnews', mpnews_message.to_json
     end
