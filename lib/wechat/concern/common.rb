@@ -159,6 +159,14 @@ module Wechat
         post 'material/add_news', mpnews_message.to_json
       end
 
+      def material_update_news(media_id, index, mpnews)
+        post 'material/update_news', JSON.generate(
+          media_id: media_id,
+          index: index,
+          articles: mpnews.slice(:thumb_media_id, :title, :author, :digest, :show_cover_pic, :content, :content_source_url)
+        )
+      end
+
       def material_delete(media_id)
         post 'material/del_material', JSON.generate(media_id: media_id)
       end

@@ -570,6 +570,26 @@ RSpec.describe Wechat::Api do
     end
   end
 
+  describe '#material_update_news' do
+    specify 'will post material/media_update_news with access_token, media_id, index and mpnews in json' do
+      media_id = 'media_id'
+      index = 0
+      mpnews = {
+        thumb_media_id: 'qI6_Ze_6PtV7svjolgs-rN6stStuHIjs9_DidOHaj0Q-mwvBelOXCFZiq2OsIU-p',
+        title: 'Happy Day',
+        author: 'xxx',
+        digest: 'digest',
+        show_cover_pic: 1,
+        content: 'content',
+        content_source_url: 'www.qq.com'
+      }
+      material_update_news_result = { errcode: 0, errmsg: 'update_news' }
+      payload = { media_id: media_id, index: index, articles: mpnews }
+      expect(subject.client).to receive(:post).with('material/update_news', payload.to_json, params: { access_token: 'access_token' }).and_return(material_update_news_result)
+      expect(subject.material_update_news(media_id, index, mpnews)).to eq(material_update_news_result)
+    end
+  end
+
   describe '#material_delete' do
     specify 'will post material/del_material with access_token and media_id in payload' do
       media_id = 'media_id'
