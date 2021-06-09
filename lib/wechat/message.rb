@@ -144,6 +144,10 @@ module Wechat
       update(MsgType: 'image', Image: { MediaId: media_id })
     end
 
+    def miniprogram(title, appid, pagepath, thumb_media_id)
+      update(MsgType: 'miniprogrampage', Miniprogrampage: { title: title, appid: appid, pagepath: pagepath, thumb_media_id: thumb_media_id})
+    end
+
     def voice(media_id)
       update(MsgType: 'voice', Voice: { MediaId: media_id })
     end
@@ -222,10 +226,11 @@ module Wechat
       'TemplateId' => 'template_id',
       'FormId' => 'form_id',
       'ContentSourceUrl' => 'content_source_url',
-      'ShowCoverPic' => 'show_cover_pic'
+      'ShowCoverPic' => 'show_cover_pic',
+      'Miniprogrampage' => 'miniprogrampage'
     }.freeze
 
-    TO_JSON_ALLOWED = %w[touser toparty msgtype content image voice video file textcard markdown
+    TO_JSON_ALLOWED = %w[touser toparty msgtype content image voice video miniprogrampage file textcard markdown
                          music news articles template agentid filter
                          send_ignore_reprint mpnews towxname].freeze
 
