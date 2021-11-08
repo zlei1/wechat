@@ -1,4 +1,4 @@
-WeChat [![Gem Version](https://badge.fury.io/rb/wechat.svg)](https://rubygems.org/gems/wechat) [![Build Status](https://travis-ci.com/Eric-Guo/wechat.svg)](https://travis-ci.com/github/Eric-Guo/wechat) [![Maintainability](https://api.codeclimate.com/v1/badges/12885358487c13e91e00/maintainability)](https://codeclimate.com/github/Eric-Guo/wechat/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/12885358487c13e91e00/test_coverage)](https://codeclimate.com/github/Eric-Guo/wechat/test_coverage)
+WeChat [![Gem Version](https://badge.fury.io/rb/wechat.svg)](https://rubygems.org/gems/wechat) [![Build Status](https://app.travis-ci.com/Eric-Guo/wechat.svg?branch=main)](https://travis-ci.com/github/Eric-Guo/wechat) [![Maintainability](https://api.codeclimate.com/v1/badges/12885358487c13e91e00/maintainability)](https://codeclimate.com/github/Eric-Guo/wechat/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/12885358487c13e91e00/test_coverage)](https://codeclimate.com/github/Eric-Guo/wechat/test_coverage)
 ======
 
 [![Join the chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Eric-Guo/wechat?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -791,6 +791,18 @@ class WechatsController < ActionController::Base
   # 事件推送群发结果
   on :event, with: 'masssendjobfinish' do |request|
     # https://mp.weixin.qq.com/wiki?action=doc&id=mp1481187827_i0l21&t=0.03571905015619936#8
+    request.reply.success # request is XML result hash.
+  end
+
+  # 客户同意进行聊天内容存档事件回调
+  on :change_external_contact do |request|
+    # https://open.work.weixin.qq.com/api/doc/90000/90135/92005
+    request.reply.success # request is XML result hash.
+  end
+
+  # 会话事件回调
+  on :msgaudit_notify do |request|
+    # https://open.work.weixin.qq.com/api/doc/90000/90135/95039
     request.reply.success # request is XML result hash.
   end
 
