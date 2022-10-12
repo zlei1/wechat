@@ -6,16 +6,21 @@ module Wechat
   class HttpClient
     attr_reader :base, :ssl_context, :httprb
 
-    def initialize(base, timeout, skip_verify_ssl)
+    def initialize(base, network_setting)
       @base = base
       @httprb = if HTTP::VERSION.to_i >= 4
-                  HTTP.timeout(write: timeout, connect: timeout, read: timeout)
+                  HTTP.timeout(write: network_setting.timeout, connect: network_setting.timeout, read: network_setting.timeout)
                 else
-                  HTTP.timeout(:global, write: timeout, connect: timeout, read: timeout)
+                  HTTP.timeout(:global, write: network_setting.timeout, connect: network_setting.timeout, read: network_setting.timeout)
                 end
+
+      unless network_setting.proxy_url.nil?
+        @httprb = @httprb.via(network_setting.proxy_url, network_setting.proxy_port.to_i, network_setting.proxy_username, network_setting.proxy_password)
+      end
+
       @ssl_context = OpenSSL::SSL::SSLContext.new
       @ssl_context.ssl_version = 'TLSv1_2'
-      @ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE if skip_verify_ssl
+      @ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE if network_setting.skip_verify_ssl
     end
 
     def get(path, get_header = {})

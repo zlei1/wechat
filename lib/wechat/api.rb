@@ -2,15 +2,16 @@
 
 module Wechat
   class Api < ApiBase
-    def initialize(appid, secret, token_file, timeout, skip_verify_ssl, jsapi_ticket_file)
+    def initialize(appid, secret, token_file, network_setting, jsapi_ticket_file)
       super()
-      @client = HttpClient.new(Wechat::Api::API_BASE, timeout, skip_verify_ssl)
+      @client = HttpClient.new(Wechat::Api::API_BASE, network_setting)
       @access_token = Token::PublicAccessToken.new(@client, appid, secret, token_file)
       @jsapi_ticket = Ticket::PublicJsapiTicket.new(@client, @access_token, jsapi_ticket_file)
       @qcloud = nil
     end
 
     include Concern::Common
+    include Concern::Draft
 
     def template_message_send(message)
       post 'message/template/send', message.to_json, content_type: :json

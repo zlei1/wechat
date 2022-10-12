@@ -5,7 +5,8 @@ RSpec.describe Wechat::CorpApi do
   let(:jsapi_ticket_file) { Rails.root.join('tmp/jsapi_ticket') }
 
   subject do
-    Wechat::CorpApi.new('corpid', 'corpsecret', token_file, '1', 20, false, jsapi_ticket_file)
+    network_setting = Wechat::NetworkSetting.new(20, false, nil, nil, nil, nil)
+    Wechat::CorpApi.new('corpid', 'corpsecret', token_file, '1', network_setting, jsapi_ticket_file)
   end
 
   before :each do
@@ -23,7 +24,7 @@ RSpec.describe Wechat::CorpApi do
       agent_list_result = { errcode: 0, errmsg: 'ok',
                             agentlist: [{ agentid: '5', name: '企业小助手',
                                           square_logo_url: 'url', round_logo_url: 'url' },
-                                        { agentid: '8', name: 'HR小助手',
+                                        { agentid: '8', name: 'HR 小助手',
                                           square_logo_url: 'url', round_logo_url: 'url' }] }
       expect(subject.client).to receive(:get)
         .with('agent/list', params: { access_token: 'access_token' }).and_return(agent_list_result)

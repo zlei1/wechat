@@ -38,8 +38,12 @@ module ActionController
       self.trusted_domain_fullname = opts[:trusted_domain_fullname] || cfg.trusted_domain_fullname
       self.oauth2_cookie_duration = opts[:oauth2_cookie_duration] || cfg.oauth2_cookie_duration.to_i.seconds
       self.timeout = opts[:timeout] || cfg.timeout
-      self.qcloud_token_lifespan = opts[:qcloud_token_lifespan] || cfg.qcloud_token_lifespan
       self.skip_verify_ssl = opts.key?(:skip_verify_ssl) ? opts[:skip_verify_ssl] : cfg.skip_verify_ssl
+
+      proxy_url = opts.key?(:proxy_url) ? opts[:proxy_url] : cfg.proxy_url
+      proxy_port = opts.key?(:proxy_port) ? opts[:proxy_port] : cfg.proxy_port
+      proxy_username = opts.key?(:proxy_username) ? opts[:proxy_username] : cfg.proxy_username
+      proxy_password = opts.key?(:proxy_password) ? opts[:proxy_password] : cfg.proxy_password
 
       return Wechat.api if account == :default && opts.empty?
 
@@ -47,20 +51,23 @@ module ActionController
       jsapi_ticket = opts[:jsapi_ticket] || cfg.jsapi_ticket
       qcloud_env = opts[:qcloud_env] || cfg.qcloud_env
       qcloud_token = opts[:qcloud_token] || cfg.qcloud_token
+      qcloud_token_lifespan = opts[:qcloud_token_lifespan] || cfg.qcloud_token_lifespan
 
       api_type = opts[:type] || cfg.type
       secret = corpid.present? ? opts[:corpsecret] || cfg.corpsecret : opts[:secret] || cfg.secret
 
-      get_wechat_api(api_type, corpid, appid, secret, access_token, agentid, timeout, skip_verify_ssl, jsapi_ticket, qcloud_env, qcloud_token, qcloud_token_lifespan)
+      network_setting = Wechat::NetworkSetting.new(timeout, skip_verify_ssl, proxy_url, proxy_port, proxy_username, proxy_password)
+      qcloud_setting = Wechat::Qcloud::Setting.new(qcloud_env, qcloud_token, qcloud_token_lifespan)
+      get_wechat_api(api_type, corpid, appid, secret, access_token, agentid, network_setting, jsapi_ticket, qcloud_setting)
     end
 
-    def get_wechat_api(api_type, corpid, appid, secret, access_token, agentid, timeout, skip_verify_ssl, jsapi_ticket, qcloud_env, qcloud_token, qcloud_token_lifespan)
+    def get_wechat_api(api_type, corpid, appid, secret, access_token, agentid, network_setting, jsapi_ticket, qcloud_setting)
       if api_type && api_type.to_sym == :mp
-        Wechat::MpApi.new(appid, secret, access_token, timeout, skip_verify_ssl, jsapi_ticket, qcloud_env, qcloud_token, qcloud_token_lifespan)
+        Wechat::MpApi.new(appid, secret, access_token, network_setting, jsapi_ticket, qcloud_setting)
       elsif corpid.present?
-        Wechat::CorpApi.new(corpid, secret, access_token, agentid, timeout, skip_verify_ssl, jsapi_ticket)
+        Wechat::CorpApi.new(corpid, secret, access_token, agentid, network_setting, jsapi_ticket)
       else
-        Wechat::Api.new(appid, secret, access_token, timeout, skip_verify_ssl, jsapi_ticket)
+        Wechat::Api.new(appid, secret, access_token, network_setting, jsapi_ticket)
       end
     end
   end

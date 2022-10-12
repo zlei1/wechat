@@ -33,7 +33,6 @@ module Wechat
     class ArticleBuilder
       attr_reader :items
 
-      delegate :count, to: :items
       def initialize
         @items = []
       end
@@ -207,6 +206,10 @@ module Wechat
       update(MsgType: 'template', Template: template_fields)
     end
 
+    def draft_news(collection)
+      update(MsgType: 'draft_news', Articles: collection)
+    end
+
     def to_xml
       ws = message_hash.delete(:WechatSession)
       xml = message_hash.to_xml(root: 'xml', children: 'item', skip_instruct: true, skip_types: true)
@@ -249,6 +252,8 @@ module Wechat
         json_hash['news'] = { 'articles' => json_hash.delete('articles') }
       when 'mpnews'
         json_hash = { 'articles' => json_hash['articles'] }
+      when 'draft_news'
+        json_hash = json_hash['articles']
       when 'ref_mpnews'
         json_hash['msgtype'] = 'mpnews'
         json_hash.delete('articles')

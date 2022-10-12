@@ -108,6 +108,11 @@ module Wechat
         post 'msg_sec_check', JSON.generate(content: content), base: Wechat::Api::WXA_BASE
       end
 
+      def wxa_generate_urllink(body_hash)
+        # https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/url-link/urllink.generate.html
+        post 'generate_urllink', JSON.generate(body_hash), base: Wechat::Api::WXA_BASE
+      end
+
       def menu
         get 'menu/get'
       end
@@ -117,7 +122,7 @@ module Wechat
       end
 
       def menu_create(menu)
-        # 微信不接受7bit escaped json(eg \uxxxx), 中文必须UTF-8编码, 这可能是个安全漏洞
+        # 微信不接受 7bit escaped json(eg \uxxxx)，中文必须 UTF-8 编码，这可能是个安全漏洞
         post 'menu/create', JSON.generate(menu)
       end
 

@@ -50,8 +50,8 @@ class App < Thor
     end
 
     desc 'department_update [DEPARTMENT_ID, NAME]', '更新部门'
-    method_option :parentid, aliases: '-p', desc: '父亲部门id。根部门id为1', default: nil
-    method_option :order, aliases: '-o', desc: '在父部门中的次序值。order值小的排序靠前。', default: nil
+    method_option :parentid, aliases: '-p', desc: '父亲部门id。根部门id为1', default: nil, check_default_type: false
+    method_option :order, aliases: '-o', desc: '在父部门中的次序值。order值小的排序靠前。', default: nil, check_default_type: false
     def department_update(departmentid, name)
       api_opts = options.slice(:parentid, :order)
       puts wechat_api.department_update(departmentid, name, api_opts[:parentid], api_opts[:order])
@@ -97,8 +97,8 @@ class App < Thor
     end
 
     desc 'user_simplelist [DEPARTMENT_ID]', '获取部门成员'
-    method_option :fetch_child, aliases: '-c', desc: '是否递归获取子部门下面的成员', default: 1
-    method_option :status, aliases: '-s', desc: '0 获取全部成员，1 获取已关注成员列表，2 获取禁用成员列表，4 获取未关注成员列表。status可叠加', default: 0
+    method_option :fetch_child, aliases: '-c', desc: '是否递归获取子部门下面的成员', default: 1, check_default_type: false
+    method_option :status, aliases: '-s', desc: '0 获取全部成员，1 获取已关注成员列表，2 获取禁用成员列表，4 获取未关注成员列表。status可叠加', default: 0, check_default_type: false
     def user_simplelist(departmentid = 1)
       api_opts = options.slice(:fetch_child, :status)
 
@@ -111,8 +111,8 @@ class App < Thor
     end
 
     desc 'user_list [DEPARTMENT_ID]', '获取部门成员详情'
-    method_option :fetch_child, aliases: '-c', desc: '是否递归获取子部门下面的成员', default: 0
-    method_option :status, aliases: '-s', desc: '0 获取全部成员，1 获取已关注成员列表，2 获取禁用成员列表，4 获取未关注成员列表。status可叠加', default: 0
+    method_option :fetch_child, aliases: '-c', desc: '是否递归获取子部门下面的成员', default: 0, check_default_type: false
+    method_option :status, aliases: '-s', desc: '0 获取全部成员，1 获取已关注成员列表，2 获取禁用成员列表，4 获取未关注成员列表。status可叠加', default: 0, check_default_type: false
     def user_list(departmentid = 1)
       api_opts = options.slice(:fetch_child, :status)
 
@@ -230,10 +230,51 @@ class App < Thor
       puts wechat_api.wxa_msg_sec_check(content)
     end
 
+    desc 'wxa_generate_urllink [PATH]', '获取小程序 URL Link'
+    def wxa_generate_urllink(path)
+      body_hash = { path: path, expire_type: 0 }
+      puts wechat_api.wxa_generate_urllink(body_hash)
+    end
+
     desc 'media_uploadnews [MPNEWS_YAML_PATH]', '上传图文消息素材'
     def media_uploadnews(mpnews_yaml_path)
-      mpnew = YAML.load(File.read(mpnews_yaml_path))
+      mpnew = Wechat::ApiLoader.load_yaml(File.read(mpnews_yaml_path))
       puts wechat_api.media_uploadnews(Wechat::Message.new(MsgType: 'uploadnews').mpnews(mpnew[:articles]))
+    end
+
+    desc 'draft_add [ARTICLE_YAML_PATH]', '新建草稿'
+    def draft_add(article_yaml_path)
+      yml_hash = Wechat::ApiLoader.load_yaml(File.read(article_yaml_path))
+      puts wechat_api.draft_add(Wechat::Message.new(MsgType: 'draft_news').draft_news(yml_hash[:articles]))
+    end
+
+    desc 'draft_get [MEDIA_ID]', '获取草稿'
+    def draft_get(media_id)
+      puts wechat_api.draft_get(media_id)
+    end
+
+    desc 'draft_delete [MEDIA_ID]', '删除草稿'
+    def draft_delete(media_id)
+      puts wechat_api.draft_delete(media_id)
+    end
+
+    desc 'draft_count', '获取草稿总数'
+    def draft_count
+      puts wechat_api.draft_count
+    end
+
+    desc 'draft_batchget [OFFSET, COUNT]', '获取草稿列表'
+    method_option :no_content, aliases: '-no_content', desc: '不要返回 content 字段', default: true, check_default_type: false
+    def draft_batchget(offset, count)
+      api_opts = options.slice(:no_content)
+      wechat_api.draft_batchget(offset, count, no_content: api_opts[:no_content])
+    end
+
+    desc 'draft_switch', '检查草稿箱和发布功能开关状态'
+    method_option :enable_draft, aliases: '-enable_draft', desc: '立刻开启草稿箱和发布功能', default: false, check_default_type: false
+    def draft_switch
+      api_opts = options.slice(:enable_draft)
+      puts wechat_api.draft_switch(checkonly: api_opts[:enable_draft] || false)
     end
 
     desc 'message_mass_delete [MSG_ID]', '删除群发消息'
@@ -349,13 +390,13 @@ class App < Thor
 
   desc 'menu_create [MENU_YAML_PATH]', '创建菜单'
   def menu_create(menu_yaml_path)
-    menu = YAML.load(File.read(menu_yaml_path))
+    menu = Wechat::ApiLoader.load_yaml(File.read(menu_yaml_path))
     puts 'Menu created' if wechat_api.menu_create(menu)
   end
 
   desc 'menu_addconditional [CONDITIONAL_MENU_YAML_PATH]', '创建个性化菜单'
   def menu_addconditional(conditional_menu_yaml_path)
-    conditional_menu = YAML.load(File.read(conditional_menu_yaml_path))
+    conditional_menu = Wechat::ApiLoader.load_yaml(File.read(conditional_menu_yaml_path))
     add_result = wechat_api.menu_addconditional(conditional_menu)
     puts "Conditional menu created: #{add_result}" if add_result
   end
@@ -408,7 +449,7 @@ class App < Thor
 
   desc 'material_add_news [MPNEWS_YAML_PATH]', '永久图文素材上传'
   def material_add_news(mpnews_yaml_path)
-    new = YAML.load(File.read(mpnews_yaml_path))
+    new = Wechat::ApiLoader.load_yaml(File.read(mpnews_yaml_path))
     puts wechat_api.material_add_news(Wechat::Message.new(MsgType: 'mpnews').mpnews(new['articles']))
   end
 
@@ -479,13 +520,13 @@ class App < Thor
 
   desc 'custom_news [OPENID, NEWS_YAML_PATH]', '发送图文客服消息'
   def custom_news(openid, news_yaml_path)
-    articles = YAML.load(File.read(news_yaml_path))
+    articles = Wechat::ApiLoader.load_yaml(File.read(news_yaml_path))
     puts wechat_api.custom_message_send Wechat::Message.to(openid).news(articles['articles'])
   end
 
   desc 'template_message [OPENID, TEMPLATE_YAML_PATH]', '模板消息接口'
   def template_message(openid, template_yaml_path)
-    template = YAML.load(File.read(template_yaml_path))
+    template = Wechat::ApiLoader.load_yaml(File.read(template_yaml_path))
     puts wechat_api.template_message_send Wechat::Message.to(openid).template(template['template'])
   end
 
@@ -555,6 +596,10 @@ class App < Thor
   desc 'clear_quota', '接口调用次数清零'
   def clear_quota
     puts wechat_api.clear_quota
+  end
+
+  def self.exit_on_failure?
+    true
   end
 end
 
