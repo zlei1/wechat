@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.17.4 (released at 2024-08-13)
+
+* Fix private API ActiveSupport::Deprecation.warn called in Rails 7.2
+
+## v0.17.3 (released at 2024-01-04)
+
+* Add New CorpApi batch_get_by_user and follow_user_list. by @leepood #321
+* Use JSON.parse handle response.body directly. by @leepood #322
+
+## v0.17.2 (released at 2023-12-30)
+
+* Fix no need the message type restrictions. by @leepood #319
+
 ## v0.17.1 (released at 2023-07-28)
 
 * Add Record based token support. by @CoolDrinELiu #315

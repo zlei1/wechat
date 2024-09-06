@@ -8,6 +8,7 @@ loader.setup
 
 require 'base64'
 require 'openssl/cipher'
+require 'ostruct'
 
 module Wechat
   class AccessTokenExpiredError < StandardError; end
@@ -19,7 +20,7 @@ module Wechat
 
     def initialize(errcode, errmsg)
       @error_code = errcode
-      super "#{errmsg}(#{error_code})"
+      super("#{errmsg}(#{error_code})")
     end
   end
 

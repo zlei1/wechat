@@ -52,16 +52,15 @@ RSpec.describe Wechat::CorpApi do
   describe '#checkin', now: true do
     specify 'will post checkin/getcheckindata with access_token and json useridlist' do
       useridlist = ['userid']
-      now = Time.now
-      starttime = now.beginning_of_day
-      endtime = now.end_of_day
+      starttime = Time.now.beginning_of_day
+      endtime = Time.now.end_of_day
       checkin_request = { opencheckindatatype: 3, starttime: starttime.to_i, endtime: endtime.to_i, useridlist: useridlist }
       checkin_result = { errcode: 0, errmsg: 'ok',
                          checkindata: [{ userid: 'userid',
                                          groupname: '打卡测试',
                                          checkin_type: '上班打卡',
                                          exception_type: '',
-                                         checkin_time: now.to_i,
+                                         checkin_time: Time.now.to_i,
                                          location_title: '某公司',
                                          location_detail: '某公司',
                                          wifiname: 'a_wifi',
@@ -455,15 +454,10 @@ RSpec.describe Wechat::CorpApi do
     specify 'will post material/get_material with access_token, agentid and media_id as payload at file based api endpoint as file' do
       material_result = 'material_tmp_file'
 
-      allow(ActiveSupport::Deprecation).to receive(:warn)
-
       expect(subject.client).to receive(:post)
         .with('material/get_material', { media_id: 'media_id' }.to_json, hash_including(params: { access_token: 'access_token', agentid: '1' },
                               as: :file)).and_return(material_result)
       expect(subject.material('media_id')).to eq(material_result)
-
-      expect(ActiveSupport::Deprecation).to have_received(:warn)
-        .with('material is deprecated. use get_material instead.')
     end
   end
 
@@ -593,6 +587,42 @@ RSpec.describe Wechat::CorpApi do
                                   })).and_return(externalcontact_data)
       expect(subject.get_externalcontact('external_userid','xxx')).to eq externalcontact_data
     end
+  end
+
+  describe '#follow_user_list' do
+    specify 'should get a list of members configured with the Customer Contact feature.' do
+      follow_user_data = {
+        errcode: 0,
+        errmsg: "ok",
+        follow_user: []
+      }
+
+      expect(subject.client).to receive(:get)
+                                  .with('externalcontact/get_follow_user_list',
+                                        hash_including(params: { access_token: 'access_token' }))
+                                  .and_return(follow_user_data)
+      expect(subject.follow_user_list).to eq follow_user_data
+    end
+  end
+
+  describe '#batch_get_by_user' do
+    specify "should get a list of external_contact user details" do
+
+      expected_data = {
+        errcode: 0,
+        errmsg: "ok",
+        external_contact_list: [],
+        next_cursor: "",
+      }
+
+      expect(subject.client).to receive(:post)
+                                  .with('externalcontact/batch/get_by_user',
+                                        JSON.generate({ userid_list: ['user_id'], cursor: '', limit: 100 }),
+                                        hash_including(params: { access_token: 'access_token' }))
+                                  .and_return(expected_data)
+      expect(subject.batch_get_by_user(['user_id'], cursor: '', limit: 100)).to eq expected_data
+    end
+
   end
 
 end

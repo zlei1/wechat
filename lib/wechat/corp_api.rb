@@ -18,6 +18,16 @@ module Wechat
       get 'externalcontact/get', params: { external_userid: external_userid, cursor: cursor }
     end
 
+    def follow_user_list
+      # https://developer.work.weixin.qq.com/document/path/92576
+      get 'externalcontact/get_follow_user_list'
+    end
+
+    def batch_get_by_user(userid_list, cursor: nil, limit: nil)
+      # https://developer.work.weixin.qq.com/document/path/93010
+      post 'externalcontact/batch/get_by_user', JSON.generate(userid_list: userid_list, cursor: cursor, limit: limit)
+    end
+
     def agent_list
       get 'agent/list'
     end
@@ -161,7 +171,7 @@ module Wechat
     end
 
     def material(media_id)
-      ActiveSupport::Deprecation.warn('material is deprecated. use get_material instead.')
+      ActiveSupport::Deprecation.new.warn('material is deprecated. use get_material instead.')
 
       post 'material/get_material', JSON.generate(media_id: media_id), params: { agentid: agentid }, as: :file
     end
